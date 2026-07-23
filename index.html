@@ -260,7 +260,37 @@
     align-items:flex-start;
     border-top:1px solid var(--line);
     padding-top:3px;
+    cursor:pointer;
+    border-radius:6px;
+    padding:6px 8px 8px 4px;
+    margin:0 -8px;
+    transition:background 0.15s ease, transform 0.15s ease;
+    position:relative;
   }
+  .itin-row:hover{
+    background:rgba(21,90,97,0.07);
+  }
+  .itin-row:hover .place{
+    text-decoration:underline;
+    text-decoration-color:var(--coral);
+    text-decoration-thickness:1.5px;
+    text-underline-offset:2px;
+  }
+  .itin-row::after{
+    content:'View postcard \2192';
+    position:absolute;
+    right:8px;
+    top:6px;
+    font-family:'Poppins','DejaVu Sans',sans-serif;
+    font-size:8.5px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    color:var(--coral-dark);
+    opacity:0;
+    transition:opacity 0.15s ease;
+    white-space:nowrap;
+  }
+  .itin-row:hover::after{ opacity:0.9; }
   .itin-row .dot{
     width:9px;height:9px;border-radius:50%;
     margin-top:3px;
@@ -323,7 +353,39 @@
     .itin-row .place{ font-size:12px; }
     .itin-row .detail{ font-size:10.5px; }
     .itin-row .date{ font-size:10.5px; }
+    .itin-row::after{ content:none; }
     .legend{ gap:24px; }
+  }
+
+  /* ===================== LIGHTBOX ===================== */
+  .lightbox{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,20,20,0.86);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    cursor:zoom-out;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{
+    max-width:min(92vw, 480px);
+    max-height:92vh;
+    border-radius:10px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox-close{
+    position:absolute;
+    top:18px;
+    right:26px;
+    font-family:'Poppins','DejaVu Sans',sans-serif;
+    font-size:34px;
+    line-height:1;
+    color:#FBF2E2;
+    opacity:0.8;
+    cursor:pointer;
   }
 </style>
 </head>
@@ -635,7 +697,7 @@
 
   <!-- ITINERARY -->
   <div class="itinerary">
-    <div class="itin-row overnight">
+    <div class="itin-row overnight" data-postcard="postcards/01_weho.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 7&ndash;11</div>
@@ -644,7 +706,7 @@
       </div>
     </div>
 
-    <div class="itin-row stop">
+    <div class="itin-row stop" data-postcard="postcards/02_travel1.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 11</div>
@@ -653,7 +715,7 @@
       </div>
     </div>
 
-    <div class="itin-row overnight">
+    <div class="itin-row overnight" data-postcard="postcards/03_ps.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 12&ndash;14</div>
@@ -662,7 +724,7 @@
       </div>
     </div>
 
-    <div class="itin-row stop">
+    <div class="itin-row stop" data-postcard="postcards/04_travel2.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 14&ndash;15</div>
@@ -671,7 +733,7 @@
       </div>
     </div>
 
-    <div class="itin-row overnight">
+    <div class="itin-row overnight" data-postcard="postcards/05_tahoe.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 15&ndash;16</div>
@@ -680,7 +742,7 @@
       </div>
     </div>
 
-    <div class="itin-row overnight">
+    <div class="itin-row overnight" data-postcard="postcards/06_davis.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 17&ndash;19</div>
@@ -689,7 +751,7 @@
       </div>
     </div>
 
-    <div class="itin-row overnight">
+    <div class="itin-row overnight" data-postcard="postcards/07_sonoma.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 19&ndash;21</div>
@@ -698,7 +760,7 @@
       </div>
     </div>
 
-    <div class="itin-row stop">
+    <div class="itin-row stop" data-postcard="postcards/08_flyhome.png">
       <div class="dot"></div>
       <div class="txt">
         <div class="date">AUG 22</div>
@@ -739,5 +801,35 @@
   <div class="footer-note">Can't wait to see so many of you along the way &mdash; text us if you want to meet up!</div>
 
 </div>
+
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightbox-img" src="" alt="Postcard">
+</div>
+
+<script>
+  const rows = document.querySelectorAll('.itin-row[data-postcard]');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      const src = row.getAttribute('data-postcard');
+      lightboxImg.src = src;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  lightbox.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+
 </body>
 </html>
