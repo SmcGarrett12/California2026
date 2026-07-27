@@ -245,56 +245,6 @@
   }
   .legend-item svg{ width:14px; height:14px; }
 
-  #replay-btn{
-    display:block;
-    margin:10px auto 0;
-    padding:7px 16px;
-    background:var(--teal);
-    color:var(--cream);
-    border:none;
-    border-radius:20px;
-    font-family:'Poppins','DejaVu Sans',sans-serif;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:0.5px;
-    cursor:pointer;
-    transition:background 0.15s ease;
-  }
-  #replay-btn:hover{ background:var(--teal-dark); }
-
-  .theme-audio{
-    margin:16px auto 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-  }
-  .theme-caption{
-    font-family:'Lora','DejaVu Serif',serif;
-    font-style:italic;
-    font-size:12px;
-    color:var(--ink);
-    opacity:0.75;
-    transition:opacity 0.3s ease;
-  }
-  #mute-btn{
-    background:none;
-    border:1.5px solid var(--teal);
-    color:var(--teal);
-    border-radius:50%;
-    width:30px;
-    height:30px;
-    font-size:14px;
-    cursor:pointer;
-    flex:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background 0.15s ease, color 0.15s ease;
-  }
-  #mute-btn:hover{ background:var(--teal); color:var(--cream); }
-  #mute-btn.is-muted{ opacity:0.5; }
-
   /* ===================== ITINERARY ===================== */
   .itinerary{
     margin-top:18px;
@@ -765,17 +715,6 @@
         Road-trip stop
       </div>
     </div>
-
-    <button id="replay-btn" type="button">&#9654; Replay animation</button>
-
-    <div class="theme-audio">
-      <div class="theme-caption" id="theme-caption">&#127925; tap anywhere to start the music</div>
-      <audio id="theme-song" loop preload="auto">
-        <source src="audio/theme.mp3" type="audio/mpeg">
-        <source src="audio/theme.m4a" type="audio/mp4">
-      </audio>
-      <button id="mute-btn" type="button" title="Mute/unmute">&#128266;</button>
-    </div>
   </div>
 
   <!-- ITINERARY -->
@@ -913,41 +852,19 @@
     if (e.key === 'Escape') closeLightbox();
   });
 
-  const replayBtn = document.getElementById('replay-btn');
+  // Animation plays automatically on load, then loops on its own:
+  // ~10s for the flight/route/pins sequence, then a 20s pause holding
+  // on the completed itinerary, then it restarts. No buttons needed.
   const mapSvg = document.querySelector('.map-wrap svg');
-  replayBtn.addEventListener('click', () => {
+  const ANIMATION_CYCLE_MS = 30000; // 10s animation + 20s pause on full map
+
+  function loopMapAnimation(){
     if (mapSvg && typeof mapSvg.setCurrentTime === 'function') {
       mapSvg.setCurrentTime(0);
     }
-  });
-
-  const themeSong = document.getElementById('theme-song');
-  const themeCaption = document.getElementById('theme-caption');
-  const muteBtn = document.getElementById('mute-btn');
-  let hasStarted = false;
-
-  function startMusicOnFirstInteraction(){
-    if (hasStarted) return;
-    hasStarted = true;
-    themeSong.play().then(() => {
-      themeCaption.textContent = '\u266A now playing';
-      setTimeout(() => { themeCaption.style.opacity = '0'; }, 2000);
-    }).catch(() => {
-      themeCaption.textContent = '\u266A tap the speaker icon to play';
-    });
-    document.removeEventListener('click', startMusicOnFirstInteraction);
-    document.removeEventListener('touchend', startMusicOnFirstInteraction);
+    setTimeout(loopMapAnimation, ANIMATION_CYCLE_MS);
   }
-  document.addEventListener('click', startMusicOnFirstInteraction);
-  document.addEventListener('touchend', startMusicOnFirstInteraction);
-
-  muteBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!hasStarted) { startMusicOnFirstInteraction(); return; }
-    themeSong.muted = !themeSong.muted;
-    muteBtn.textContent = themeSong.muted ? '\u{1F507}' : '\u{1F50A}';
-    muteBtn.classList.toggle('is-muted', themeSong.muted);
-  });
+  setTimeout(loopMapAnimation, ANIMATION_CYCLE_MS);
 </script>
 
 </body>
